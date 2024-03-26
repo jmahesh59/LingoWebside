@@ -5,7 +5,7 @@ import { serial, pgTable, text, integer } from "drizzle-orm/pg-core";
 export const courses = pgTable("courses",{
     id: serial("id").primaryKey(),
     title: text("title").notNull(),
-    imgSrc: text("image_src").notNull(),
+    imageSrc: text("image_src").notNull(),
 });
 
 export const coursesRelations = relations(courses,({many})=>({
