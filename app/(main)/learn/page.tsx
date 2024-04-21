@@ -3,15 +3,37 @@ import { StickyWrapper } from "@/components/sticky-wraper";
 import React from "react";
 import { Header } from "./header";
 import { UserProgress } from "@/components/user-progress";
-import { getUserProgress } from "@/db/queries";
+import { 
+  getCourseProgress, 
+  getLessonPercentage, 
+  getUnits, 
+  getUserProgress } from "@/db/queries";
 import { redirect } from "next/navigation";
+import { Unit } from "./unit";
 
 const LearnPage = async() => {
   const userProgressData = getUserProgress();
-  
-  const [userProgress] = await Promise.all([userProgressData])
+  const courseProgressData = getCourseProgress();
+  const lessonPercentageData = getLessonPercentage();
+  const unitsData = getUnits();
+
+  const [
+    userProgress ,
+     units,
+     courseProgress,
+     lessonPercentage
+    ] = await Promise.all(
+      [userProgressData ,
+        unitsData,
+        courseProgressData,
+        lessonPercentageData
+      ])
 
   if(!userProgress || !userProgress.activeCourse){
+    redirect("/courses")
+  }
+
+  if(!courseProgress){
     redirect("/courses")
   }
 
@@ -27,11 +49,21 @@ const LearnPage = async() => {
             </StickyWrapper>
             <FeedWrapper>
               <Header title={userProgress.activeCourse.title}/>
-              <div className="space-y-4">
-                <div className="h-[700px] bg-blue-500 w-full"/>
-                <div className="h-[700px] bg-blue-500 w-full"/>
-                <div className="h-[700px] bg-blue-500 w-full"/>
-              </div>
+               {
+                units.map((unit)=>(
+                  <div className="mb-10" key={unit.id}>
+                    <Unit
+                      id={unit.id}
+                      order={unit.order}
+                      description={unit.description}
+                      title={unit.title}
+                      lessons={unit.lessons}
+                      activeLesson={courseProgress?.activeLesson}
+                      activeLessonPercentage={lessonPercentage}
+                    />
+                  </div>
+                ))
+               }
             </FeedWrapper>
         </div>
     );
